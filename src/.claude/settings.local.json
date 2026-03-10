@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"/Users/brandonburr/Documents/AI Work/Bootcamp/codeigniter-docker\" && docker compose down -v && docker compose up -d)",
+      "Bash(cd \"/Users/brandonburr/Documents/AI Work/Bootcamp/codeigniter-docker\" && docker compose logs mysql 2>&1 | tail -5)",
+      "Bash(curl -s http://localhost:8080/test | head -30)"
+    ]
+  }
+}

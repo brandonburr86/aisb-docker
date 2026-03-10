@@ -1,0 +1,6 @@
+.env
+src/vendor/
+src/writable/logs/*
+src/writable/cache/*
+src/writable/session/*
+!.gitkeep
