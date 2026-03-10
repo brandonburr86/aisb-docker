@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI SaaS Bootcamp — Tech Setup Guide</title>
+<style>
+  :root {
+    --blue: #1B4F72;
+    --blue-light: #D6EAF8;
+    --blue-mid: #2980B9;
+    --dark: #2C3E50;
+    --green: #117A65;
+    --green-light: #D5F5E3;
+    --orange: #E67E22;
+    --orange-light: #FDEBD0;
+    --grey: #F8F9FA;
+    --grey-mid: #E9ECEF;
+    --border: #DEE2E6;
+    --text: #212529;
+    --text-muted: #6C757D;
+    --radius: 8px;
+    --shadow: 0 2px 8px rgba(0,0,0,.08);
+    --shadow-lg: 0 4px 20px rgba(0,0,0,.12);
+    --mono: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --sidebar-w: 280px;
+    --header-h: 64px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; font-size: 16px; }
+
+  body {
+    font-family: var(--sans);
+    color: var(--text);
+    background: var(--grey);
+    line-height: 1.7;
+  }
+
+  /* ── Header ──────────────────────────────────────────────────────────── */
+  .site-header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: var(--header-h);
+    background: var(--blue);
+    color: #fff;
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 24px;
+    box-shadow: var(--shadow-lg);
+  }
+  .site-header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -.01em; }
+  .site-header .subtitle { font-size: .85rem; opacity: .75; }
+  .hamburger {
+    display: none; background: none; border: none; color: #fff; cursor: pointer;
+    font-size: 1.5rem; padding: 4px 8px; border-radius: 4px;
+  }
+  .hamburger:hover { background: rgba(255,255,255,.15); }
+
+  /* ── OS Selector Pills (header right) ────────────────────────────────── */
+  .os-pills {
+    display: flex; gap: 4px; margin-left: auto;
+    background: rgba(255,255,255,.12); border-radius: 6px; padding: 3px;
+  }
+  .os-pill {
+    padding: 6px 16px; border-radius: 4px; border: none; cursor: pointer;
+    font-size: .85rem; font-weight: 600; font-family: var(--sans);
+    background: transparent; color: rgba(255,255,255,.7); transition: all .2s;
+  }
+  .os-pill:hover { color: #fff; background: rgba(255,255,255,.12); }
+  .os-pill.active { color: var(--blue); background: #fff; }
+  .os-pill .icon { margin-right: 6px; }
+
+  /* ── Sidebar ─────────────────────────────────────────────────────────── */
+  .sidebar {
+    position: fixed; top: var(--header-h); left: 0; bottom: 0;
+    width: var(--sidebar-w);
+    background: #fff;
+    border-right: 1px solid var(--border);
+    overflow-y: auto; padding: 20px 0;
+    z-index: 50;
+    transition: transform .3s ease;
+  }
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.3);
+    z-index: 40;
+  }
+  .sidebar .nav-section { padding: 8px 20px; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin-top: 12px; }
+  .sidebar .nav-section:first-child { margin-top: 0; }
+  .sidebar a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px; font-size: .9rem; color: var(--text);
+    text-decoration: none; border-left: 3px solid transparent;
+    transition: all .15s;
+  }
+  .sidebar a:hover { background: var(--grey); color: var(--blue); }
+  .sidebar a.active { background: var(--blue-light); color: var(--blue); border-left-color: var(--blue); font-weight: 600; }
+  .sidebar a .step-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 50%; font-size: .75rem; font-weight: 700;
+    background: var(--grey-mid); color: var(--text-muted); flex-shrink: 0;
+  }
+  .sidebar a.active .step-num { background: var(--blue); color: #fff; }
+  .sidebar a.completed .step-num { background: var(--green); color: #fff; }
+  .sidebar a.completed .step-num::after { content: "✓"; }
+  .sidebar a.completed .step-num span { display: none; }
+
+  /* ── Main Content ────────────────────────────────────────────────────── */
+  .main {
+    margin-left: var(--sidebar-w); margin-top: var(--header-h);
+    padding: 32px 40px 80px;
+    max-width: 900px;
+  }
+
+  /* Section / Step blocks */
+  .step-section { display: none; animation: fadeIn .3s ease; }
+  .step-section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .step-section h2 {
+    font-size: 1.6rem; font-weight: 800; color: var(--blue);
+    margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+  }
+  .step-section h2 .badge {
+    font-size: .7rem; padding: 3px 10px; border-radius: 20px;
+    background: var(--blue-light); color: var(--blue); font-weight: 600;
+  }
+  .step-section > .step-subtitle {
+    font-size: 1rem; color: var(--text-muted); margin-bottom: 24px;
+  }
+
+  h3 { font-size: 1.15rem; font-weight: 700; color: var(--dark); margin: 28px 0 12px; }
+  h4 { font-size: 1rem; font-weight: 700; color: var(--green); margin: 20px 0 10px; }
+
+  p { margin-bottom: 12px; }
+
+  /* Ordered lists within step content */
+  .step-content ol { counter-reset: step; padding-left: 0; list-style: none; margin-bottom: 16px; }
+  .step-content ol > li {
+    counter-increment: step;
+    padding: 12px 16px 12px 52px; position: relative;
+    margin-bottom: 8px; background: #fff; border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .step-content ol > li::before {
+    content: counter(step);
+    position: absolute; left: 14px; top: 12px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--blue); color: #fff; font-size: .8rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-content ul { padding-left: 24px; margin-bottom: 12px; }
+  .step-content ul li { margin-bottom: 6px; }
+  .step-content ul li::marker { color: var(--blue); }
+
+  /* Code blocks */
+  pre {
+    background: #1E293B; color: #E2E8F0; border-radius: var(--radius);
+    padding: 16px 20px; overflow-x: auto; margin: 12px 0 16px;
+    font-family: var(--mono); font-size: .88rem; line-height: 1.6;
+    position: relative;
+  }
+  pre .copy-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+    color: #94A3B8; border-radius: 4px; padding: 4px 10px; cursor: pointer;
+    font-size: .75rem; font-family: var(--sans); transition: all .15s;
+  }
+  pre .copy-btn:hover { background: rgba(255,255,255,.2); color: #fff; }
+  pre .copy-btn.copied { background: var(--green); color: #fff; border-color: var(--green); }
+  code { font-family: var(--mono); }
+  p code, li code {
+    background: var(--grey-mid); padding: 2px 6px; border-radius: 3px;
+    font-size: .88em; color: var(--dark);
+  }
+
+  /* Callout boxes */
+  .callout {
+    padding: 14px 18px; border-radius: var(--radius); margin: 16px 0;
+    border-left: 4px solid; font-size: .93rem;
+  }
+  .callout-tip { background: var(--green-light); border-color: var(--green); }
+  .callout-tip strong { color: var(--green); }
+  .callout-warn { background: var(--orange-light); border-color: var(--orange); }
+  .callout-warn strong { color: var(--orange); }
+  .callout-note { background: var(--blue-light); border-color: var(--blue); }
+  .callout-note strong { color: var(--blue); }
+
+  /* Tables */
+  table {
+    width: 100%; border-collapse: collapse; margin: 16px 0;
+    font-size: .9rem; background: #fff; border-radius: var(--radius);
+    overflow: hidden; box-shadow: var(--shadow);
+  }
+  th { background: var(--blue); color: #fff; text-align: left; padding: 10px 14px; font-weight: 600; }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: var(--grey); }
+  td code { background: rgba(27,79,114,.08); padding: 2px 6px; border-radius: 3px; }
+
+  /* OS-specific content toggling */
+  .os-mac, .os-win, .os-linux { display: none; }
+  body.show-mac .os-mac { display: block; }
+  body.show-win .os-win { display: block; }
+  body.show-linux .os-linux { display: block; }
+  /* Inline variants */
+  span.os-mac, span.os-win, span.os-linux { display: none; }
+  body.show-mac span.os-mac { display: inline; }
+  body.show-win span.os-win { display: inline; }
+  body.show-linux span.os-linux { display: inline; }
+
+  /* Navigation buttons */
+  .nav-buttons {
+    display: flex; justify-content: space-between; margin-top: 40px;
+    padding-top: 24px; border-top: 1px solid var(--border);
+  }
+  .nav-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: var(--radius); font-size: .9rem;
+    font-weight: 600; cursor: pointer; border: 2px solid var(--blue);
+    font-family: var(--sans); transition: all .15s;
+  }
+  .nav-btn.primary { background: var(--blue); color: #fff; }
+  .nav-btn.primary:hover { background: #154360; }
+  .nav-btn.secondary { background: #fff; color: var(--blue); }
+  .nav-btn.secondary:hover { background: var(--blue-light); }
+  .nav-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed; top: var(--header-h); left: var(--sidebar-w); right: 0;
+    height: 3px; background: var(--grey-mid); z-index: 30;
+  }
+  .progress-bar .fill {
+    height: 100%; background: linear-gradient(90deg, var(--blue-mid), var(--green));
+    transition: width .4s ease; width: 0%;
+  }
+
+  /* ── Responsive ──────────────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+    .sidebar-overlay.open { display: block; }
+    .main { margin-left: 0; padding: 24px 20px 80px; }
+    .hamburger { display: block; }
+    .progress-bar { left: 0; }
+    .os-pills { gap: 2px; }
+    .os-pill { padding: 6px 10px; font-size: .78rem; }
+    .os-pill .icon { display: none; }
+  }
+</style>
+</head>
+<body class="show-mac">
+
+<!-- ═══════════════════════ HEADER ═══════════════════════ -->
+<header class="site-header">
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+  <div>
+    <h1>AI SaaS Bootcamp</h1>
+    <div class="subtitle">Tech Setup Guide</div>
+  </div>
+  <div class="os-pills" role="tablist">
+    <button class="os-pill active" data-os="mac" role="tab" aria-selected="true"><span class="icon">🍎</span>macOS</button>
+    <button class="os-pill" data-os="win" role="tab" aria-selected="false"><span class="icon">🪟</span>Windows</button>
+    <button class="os-pill" data-os="linux" role="tab" aria-selected="false"><span class="icon">🐧</span>Linux</button>
+  </div>
+</header>
+
+<div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+
+<!-- ═══════════════════════ SIDEBAR ══════════════════════ -->
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+<nav class="sidebar">
+  <div class="nav-section">Setup Steps</div>
+  <a href="#" class="nav-link active" data-step="1">
+    <span class="step-num"><span>1</span></span> Docker Environment
+  </a>
+  <a href="#" class="nav-link" data-step="2">
+    <span class="step-num"><span>2</span></span> Claude Code
+  </a>
+  <a href="#" class="nav-link" data-step="3">
+    <span class="step-num"><span>3</span></span> GitHub Account
+  </a>
+  <a href="#" class="nav-link" data-step="4">
+    <span class="step-num"><span>4</span></span> Sourcetree
+  </a>
+  <a href="#" class="nav-link" data-step="5">
+    <span class="step-num"><span>5</span></span> Navicat for MySQL
+  </a>
+  <div class="nav-section">Reference</div>
+  <a href="#" class="nav-link" data-step="6">
+    <span class="step-num"><span>6</span></span> Troubleshooting
+  </a>
+</nav>
+
+<!-- ═══════════════════════ MAIN CONTENT ═════════════════ -->
+<main class="main">
+
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  STEP 1 — DOCKER                                                    ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
+<section class="step-section active" data-step="1">
+  <h2>
+    <span class="badge">Step 1</span>
+    CodeIgniter 4 Docker Environment
+  </h2>
+  <p class="step-subtitle">Set up the full-stack Docker environment: Nginx, PHP 8.2, MySQL 8.0, and Redis 7.</p>
+
+  <div class="step-content">
+    <h3>What You're Setting Up</h3>
+    <table>
+      <tr><th>Service</th><th>Container</th><th>Port</th><th>Details</th></tr>
+      <tr><td>Nginx</td><td><code>ci4-nginx</code></td><td>8080 → 80</td><td>Reverse proxy, static files</td></tr>
+      <tr><td>PHP-FPM</td><td><code>ci4-php</code></td><td>9000 (internal)</td><td>PHP 8.2, Xdebug, Composer</td></tr>
+      <tr><td>MySQL</td><td><code>ci4-mysql</code></td><td>3306</td><td>MySQL 8.0 database</td></tr>
+      <tr><td>Redis</td><td><code>ci4-redis</code></td><td>6379</td><td>Cache / session store</td></tr>
+    </table>
+
+    <!-- ── macOS Docker ──────────────────────────────────────────────── -->
+    <div class="os-mac">
+      <h3>Install Docker Desktop</h3>
+      <h4>Option A: Automated Script (Recommended)</h4>
+      <p>Open <strong>Terminal</strong> and run:</p>
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>cd /path/to/codeigniter-docker
+chmod +x scripts/mac/setup.sh
+./scripts/mac/setup.sh</pre>
+      <p>The script installs Homebrew (if needed), Docker Desktop, copies the environment file, and builds all containers automatically.</p>
+
+      <h4>Option B: Manual Installation</h4>
+      <ol>
+        <li><strong>Install via Homebrew:</strong>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>brew install --cask docker</pre>
+          Or download from <a href="https://docs.docker.com/desktop/install/mac-install/" target="_blank">docs.docker.com</a>.
+        </li>
+        <li><strong>Start Docker Desktop</strong> from Applications. Wait for the whale icon to stop animating, then verify:
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>docker info</pre>
+        </li>
+        <li><strong>Navigate to the project and set up:</strong>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>cd /path/to/codeigniter-docker
+cp .env.example .env</pre>
+        </li>
+        <li><strong>Build and start containers:</strong>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>docker compose up -d --build</pre>
+          <p>First build: 3–5 minutes. Subsequent starts are near-instant.</p>
+        </li>
+        <li><strong>Verify:</strong> Open <a href="http://localhost:8080" target="_blank">http://localhost:8080</a>. You should see a green status page.</li>
+      </ol>
+      <div class="callout callout-note"><strong>Note:</strong> On Apple Silicon (M1/M2/M3/M4), all images run natively on ARM — no Rosetta needed.</div>
+    </div>
+
+    <!-- ── Windows Docker ────────────────────────────────────────────── -->
+    <div class="os-win">
+      <h3>Install Docker Desktop</h3>
+      <h4>Option A: Automated Script (Recommended)</h4>
+      <p>Open <strong>Command Prompt</strong> or <strong>Windows Terminal</strong>:</p>
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>cd C:\path\to\codeigniter-docker
+scripts\windows\setup.bat</pre>
+      <p>Or use PowerShell:</p>
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>powershell -ExecutionPolicy Bypass -File scripts\windows\setup.ps1</pre>
+
+      <h4>Option B: Manual Installation</h4>
+      <ol>
+        <li><strong>Enable WSL 2:</strong> Open PowerShell as Administrator:
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>wsl --install</pre>
+          Restart your computer.
+        </li>
+        <li><strong>Install Docker Desktop:</strong> Download from <a href="https://docs.docker.com/desktop/install/windows-install/" target="_blank">docs.docker.com</a>. Check "Use WSL 2 instead of Hyper-V". Restart if prompted.</li>
+        <li><strong>Start Docker Desktop</strong> from the Start menu. Wait for the green "running" indicator, then verify:
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>docker info</pre>
+        </li>
+        <li><strong>Navigate and set up:</strong>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>cd C:\path\to\codeigniter-docker
+copy .env.example .env</pre>
+        </li>
+        <li><strong>Build and start:</strong>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>docker compose up -d --build</pre>
+        </li>
+        <li><strong>Verify:</strong> Open <a href="http://localhost:8080" target="_blank">http://localhost:8080</a>.</li>
+      </ol>
+      <div class="callout callout-warn"><strong>Important:</strong> If you see virtualization errors, enable VT-x / AMD-V in your BIOS/UEFI settings.</div>
+    </div>
+
+    <!-- ── Linux Docker ──────────────────────────────────────────────── -->
+    <div class="os-linux">
+      <h3>Install Docker Engine</h3>
+      <h4>Option A: Automated Script (Recommended)</h4>
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>cd /path/to/codeigniter-docker
+chmod +x scripts/linux/setup.sh
+./scripts/linux/setup.sh</pre>
+
+      <h4>Option B: Manual Installation (Ubuntu/Debian)</h4>
+      <ol>
+        <li><strong>Install Docker Engine:</strong>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>sudo apt-get update
+sudo apt-get install -y ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+  | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+echo "deb [arch=$(dpkg --print-architecture) \
+  signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" \
+  | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli \
+  containerd.io docker-buildx-plugin docker-compose-plugin</pre>
+        </li>
+        <li><strong>Allow Docker without sudo:</strong>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>sudo usermod -aG docker $USER
+newgrp docker</pre>
+        </li>
+        <li><strong>Enable and start:</strong>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>sudo systemctl enable docker
+sudo systemctl start docker</pre>
+        </li>
+        <li><strong>Navigate and set up:</strong>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>cd /path/to/codeigniter-docker
+cp .env.example .env</pre>
+        </li>
+        <li><strong>Build and start:</strong>
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>docker compose up -d --build</pre>
+        </li>
+        <li><strong>Verify:</strong> Open <a href="http://localhost:8080" target="_blank">http://localhost:8080</a>.</li>
+      </ol>
+      <div class="callout callout-warn"><strong>Important:</strong> You may need to log out and back in after adding yourself to the docker group.</div>
+    </div>
+
+    <!-- ── Shared: Install CI4 ───────────────────────────────────────── -->
+    <h3>Install CodeIgniter 4</h3>
+    <p>With the containers running, install CodeIgniter inside the PHP container:</p>
+    <ol>
+      <li><strong>Shell into the PHP container:</strong>
+        <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>docker compose exec php bash</pre>
+      </li>
+      <li><strong>Install via Composer:</strong>
+        <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>composer create-project codeigniter4/appstarter .</pre>
+      </li>
+      <li><strong>Exit the container:</strong>
+        <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>exit</pre>
+      </li>
+      <li><strong>Refresh</strong> <a href="http://localhost:8080" target="_blank">http://localhost:8080</a> — you should see the CodeIgniter 4 welcome page.</li>
+    </ol>
+    <div class="callout callout-tip"><strong>Tip:</strong> The <code>src/</code> folder on your computer is mounted into the container. Edits in your code editor appear instantly in the browser.</div>
+
+    <h3>Configure CodeIgniter for MySQL</h3>
+    <p>Open <code>src/.env</code> (CodeIgniter's own env file, <em>not</em> the Docker <code>.env</code>) and set:</p>
+    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>database.default.hostname = mysql
+database.default.database = webapp
+database.default.username = webapp_user
+database.default.password = dqgS5uthcuxR
+database.default.DBDriver = MySQLi
+database.default.port     = 3306</pre>
+    <div class="callout callout-warn"><strong>Important:</strong> The hostname is <code>mysql</code> (the Docker service name), not <code>localhost</code>. Docker's internal DNS resolves service names to container IPs.</div>
+
+    <h3>Useful Commands</h3>
+    <table>
+      <tr><th>Command</th><th>Description</th></tr>
+      <tr><td><code>docker compose up -d</code></td><td>Start containers in background</td></tr>
+      <tr><td><code>docker compose down</code></td><td>Stop containers (data kept)</td></tr>
+      <tr><td><code>docker compose down -v</code></td><td>Stop and wipe database data</td></tr>
+      <tr><td><code>docker compose up -d --build</code></td><td>Rebuild after config changes</td></tr>
+      <tr><td><code>docker compose logs -f</code></td><td>Stream live logs</td></tr>
+      <tr><td><code>docker compose exec php bash</code></td><td>Shell into PHP container</td></tr>
+      <tr><td><code>docker compose ps</code></td><td>Show running containers</td></tr>
+    </table>
+  </div>
+
+  <div class="nav-buttons">
+    <span></span>
+    <button class="nav-btn primary" onclick="goToStep(2)">Next: Claude Code →</button>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  STEP 2 — CLAUDE CODE                                               ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
+<section class="step-section" data-step="2">
+  <h2>
+    <span class="badge">Step 2</span>
+    Claude Code
+  </h2>
+  <p class="step-subtitle">Install Anthropic's AI coding assistant and connect your API key.</p>
+
+  <div class="step-content">
+    <h3>2.1 — Create Your Anthropic Account</h3>
+    <ol>
+      <li>Go to <a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a> and click <strong>Sign Up</strong>.</li>
+      <li><strong>Verify your email</strong> and complete account creation.</li>
+      <li>Navigate to <strong>Settings → API Keys</strong> (or click "Get API Keys" on the dashboard).</li>
+      <li>Click <strong>"Create Key"</strong>. Name it (e.g., "Bootcamp"). <strong>Copy the key immediately</strong> — you won't be able to see it again.</li>
+    </ol>
+    <div class="callout callout-warn"><strong>Important:</strong> Keep your API key secret. Never commit it to Git or share it publicly.</div>
+
+    <h3>2.2 — Install Node.js</h3>
+    <p>Claude Code requires Node.js 18 or later.</p>
+
+    <div class="os-mac">
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>brew install node</pre>
+      <p>Verify:</p>
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>node --version   # should show v18 or higher
+npm --version</pre>
+    </div>
+
+    <div class="os-win">
+      <p>Download the <strong>LTS installer</strong> from <a href="https://nodejs.org/" target="_blank">nodejs.org</a> and run it (accept the defaults). Then open a <em>new</em> Command Prompt:</p>
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>node --version
+npm --version</pre>
+    </div>
+
+    <div class="os-linux">
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs</pre>
+      <p>Verify:</p>
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>node --version
+npm --version</pre>
+    </div>
+
+    <h3>2.3 — Install Claude Code</h3>
+    <div class="os-mac">
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>npm install -g @anthropic-ai/claude-code</pre>
+    </div>
+    <div class="os-win">
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>npm install -g @anthropic-ai/claude-code</pre>
+      <div class="callout callout-note"><strong>Note:</strong> If you get a permissions error, try running the Command Prompt or PowerShell as Administrator.</div>
+    </div>
+    <div class="os-linux">
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>sudo npm install -g @anthropic-ai/claude-code</pre>
+    </div>
+    <p>Verify:</p>
+    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>claude --version</pre>
+
+    <h3>2.4 — Connect Your API Key</h3>
+    <ol>
+      <li><strong>Launch Claude Code:</strong>
+        <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>claude</pre>
+      </li>
+      <li>On first launch, it will <strong>ask for your API key</strong>. Paste the key you copied from the Anthropic Console.</li>
+      <li>The key is stored securely in your user profile. You won't need to enter it again.</li>
+      <li><strong>Test it:</strong> Type a prompt like "What version of Claude are you?" and confirm you get a response.</li>
+    </ol>
+    <div class="callout callout-tip"><strong>Tip:</strong> You can also set the key via environment variable:
+      <span class="os-mac"><code>export ANTHROPIC_API_KEY=sk-ant-...</code> (add to <code>~/.zshrc</code>)</span>
+      <span class="os-win"><code>set ANTHROPIC_API_KEY=sk-ant-...</code> (or use System Environment Variables)</span>
+      <span class="os-linux"><code>export ANTHROPIC_API_KEY=sk-ant-...</code> (add to <code>~/.bashrc</code>)</span>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn secondary" onclick="goToStep(1)">← Previous</button>
+    <button class="nav-btn primary" onclick="goToStep(3)">Next: GitHub Account →</button>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  STEP 3 — GITHUB                                                    ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
+<section class="step-section" data-step="3">
+  <h2>
+    <span class="badge">Step 3</span>
+    GitHub Account
+  </h2>
+  <p class="step-subtitle">Create a GitHub account and configure Git for version control.</p>
+
+  <div class="step-content">
+    <h3>3.1 — Create a GitHub Account</h3>
+    <ol>
+      <li>Go to <a href="https://github.com" target="_blank">github.com</a> and click <strong>Sign Up</strong>.</li>
+      <li>Choose a <strong>username</strong>, enter your email, and create a password.</li>
+      <li>Complete the verification puzzle and <strong>confirm your email address</strong>.</li>
+      <li>Choose the <strong>Free plan</strong> (includes unlimited public and private repos).</li>
+    </ol>
+
+    <h3>3.2 — Install &amp; Configure Git</h3>
+
+    <div class="os-mac">
+      <p>macOS ships with Git via Xcode Command Line Tools. Verify:</p>
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>git --version</pre>
+      <p>If it prompts to install Xcode Command Line Tools, click <strong>Install</strong> and wait.</p>
+    </div>
+
+    <div class="os-win">
+      <p>Download <strong>Git for Windows</strong> from <a href="https://git-scm.com/download/win" target="_blank">git-scm.com</a> and run the installer (accept defaults). Then open a new Command Prompt:</p>
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>git --version</pre>
+    </div>
+
+    <div class="os-linux">
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>sudo apt-get update
+sudo apt-get install -y git
+git --version</pre>
+    </div>
+
+    <h3>3.3 — Set Your Git Identity</h3>
+    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>git config --global user.name "Your Full Name"
+git config --global user.email "your-email@example.com"</pre>
+    <div class="callout callout-warn"><strong>Important:</strong> Use the same email you used for GitHub so your commits are linked to your profile.</div>
+
+    <h3>3.4 — Create Your First Repository</h3>
+    <ol>
+      <li>On GitHub, click the <strong>+</strong> icon (top-right) → <strong>New repository</strong>.</li>
+      <li>Name it something like <code>ai-saas-bootcamp</code>.</li>
+      <li>Set it to <strong>Private</strong> (recommended for coursework).</li>
+      <li><strong>Do NOT</strong> check "Initialize with a README" — we'll push the existing Docker project to this empty repo.</li>
+      <li>Click <strong>Create repository</strong>. Keep this page open — you'll need the URL in the Sourcetree section.</li>
+    </ol>
+    <div class="callout callout-tip"><strong>Tip:</strong> Your repository URL will look like: <code>https://github.com/your-username/ai-saas-bootcamp.git</code></div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn secondary" onclick="goToStep(2)">← Previous</button>
+    <button class="nav-btn primary" onclick="goToStep(4)">Next: Sourcetree →</button>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  STEP 4 — SOURCETREE                                                ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
+<section class="step-section" data-step="4">
+  <h2>
+    <span class="badge">Step 4</span>
+    Sourcetree — Git GUI Client
+  </h2>
+  <p class="step-subtitle">Install Sourcetree and connect it to your local Docker repository and remote GitHub repo.</p>
+
+  <div class="step-content">
+    <h3>4.1 — Install Sourcetree</h3>
+
+    <div class="os-mac">
+      <ol>
+        <li><strong>Download:</strong> Go to <a href="https://www.sourcetreeapp.com/" target="_blank">sourcetreeapp.com</a> → Download for Mac.</li>
+        <li><strong>Install:</strong> Open the .zip and drag Sourcetree to Applications.</li>
+        <li><strong>First launch:</strong> Accept the licence terms. You may be asked to sign in with an Atlassian account (free) or skip.</li>
+        <li><strong>Git config:</strong> Let Sourcetree use the system Git installation.</li>
+      </ol>
+    </div>
+
+    <div class="os-win">
+      <ol>
+        <li><strong>Download:</strong> Go to <a href="https://www.sourcetreeapp.com/" target="_blank">sourcetreeapp.com</a> → Download for Windows.</li>
+        <li><strong>Install:</strong> Run the installer. Create a free Atlassian account when prompted, or skip.</li>
+        <li><strong>Git selection:</strong> Choose <strong>"Embedded Git"</strong> (recommended).</li>
+        <li>Accept remaining defaults and finish.</li>
+      </ol>
+    </div>
+
+    <div class="os-linux">
+      <div class="callout callout-note"><strong>Note:</strong> Sourcetree doesn't have an official Linux version. Recommended alternatives:</div>
+      <ul>
+        <li><strong>GitKraken</strong> — <a href="https://www.gitkraken.com/" target="_blank">gitkraken.com</a> (free for public repos)</li>
+        <li><strong>Sublime Merge</strong> — <a href="https://www.sublimemerge.com/" target="_blank">sublimemerge.com</a></li>
+        <li><strong>Git Cola</strong> — <a href="https://git-cola.github.io/" target="_blank">git-cola.github.io</a> (free, open source)</li>
+      </ul>
+      <p>To install GitKraken:</p>
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>sudo snap install gitkraken --classic</pre>
+      <p>The steps below use Sourcetree terminology, but the concepts are identical in any Git GUI.</p>
+    </div>
+
+    <h3>4.2 — Connect to the Local Docker Repository</h3>
+    <p>First, initialise Git in the project folder (if not already done):</p>
+    <div class="os-mac">
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>cd /path/to/codeigniter-docker
+git init
+git add .
+git commit -m "Initial commit: Docker environment"</pre>
+    </div>
+    <div class="os-win">
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>cd C:\path\to\codeigniter-docker
+git init
+git add .
+git commit -m "Initial commit: Docker environment"</pre>
+    </div>
+    <div class="os-linux">
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>cd /path/to/codeigniter-docker
+git init
+git add .
+git commit -m "Initial commit: Docker environment"</pre>
+    </div>
+
+    <p>Then open it in <span class="os-mac">Sourcetree</span><span class="os-win">Sourcetree</span><span class="os-linux">your Git GUI</span>:</p>
+
+    <div class="os-mac">
+      <ol>
+        <li>In Sourcetree, go to <strong>File → New → Add Existing Local Repository</strong>.</li>
+        <li>Browse to your <code>codeigniter-docker</code> folder and click <strong>Add</strong>.</li>
+        <li>You should see the repository with your initial commit in the log.</li>
+      </ol>
+    </div>
+    <div class="os-win">
+      <ol>
+        <li>In Sourcetree, click the <strong>+ New</strong> tab button → <strong>Add</strong>.</li>
+        <li>Browse to your <code>codeigniter-docker</code> folder and click <strong>Add</strong>.</li>
+        <li>You should see the repository with your initial commit in the log.</li>
+      </ol>
+    </div>
+    <div class="os-linux">
+      <ol>
+        <li>In your Git GUI, use the <strong>Open / Add Existing Repository</strong> option.</li>
+        <li>Browse to your <code>codeigniter-docker</code> folder.</li>
+        <li>You should see the repository with your initial commit.</li>
+      </ol>
+    </div>
+
+    <h3>4.3 — Connect to the Remote GitHub Repository</h3>
+    <p>Link your local repository to the GitHub repo you created in Step 3.</p>
+    <ol>
+      <li><strong>Copy the GitHub URL</strong> from your repository page (e.g., <code>https://github.com/your-username/ai-saas-bootcamp.git</code>).</li>
+      <li class="os-mac"><strong>In Sourcetree:</strong> Go to <strong>Repository → Repository Settings</strong> (or ⌘ + ,) → <strong>Remotes</strong> tab → <strong>Add</strong>. Set Remote Name to <code>origin</code> and paste the URL. Click OK.</li>
+      <li class="os-win"><strong>In Sourcetree:</strong> Go to <strong>Repository → Repository Settings</strong> → <strong>Remotes</strong> tab → <strong>Add</strong>. Set Remote Name to <code>origin</code> and paste the URL. Click OK.</li>
+      <li class="os-linux"><strong>In your Git GUI:</strong> Open Repository Settings → Remotes → Add a remote named <code>origin</code> with your GitHub URL.</li>
+      <li><strong>Push your code:</strong> Click the <strong>Push</strong> button. Select the <code>main</code> branch and confirm. You'll be prompted for GitHub credentials the first time.</li>
+      <li><strong>Verify:</strong> Refresh your GitHub repository page — you should see all your Docker files.</li>
+    </ol>
+    <div class="callout callout-warn"><strong>Important:</strong> GitHub no longer accepts passwords for HTTPS Git operations. When prompted, use a <strong>Personal Access Token (PAT)</strong> instead. Create one at: GitHub → Settings → Developer Settings → Personal Access Tokens → Generate New Token (give it <code>repo</code> scope).</div>
+
+    <p>You can also add the remote from the command line:</p>
+    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>git remote add origin https://github.com/your-username/ai-saas-bootcamp.git
+git branch -M main
+git push -u origin main</pre>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn secondary" onclick="goToStep(3)">← Previous</button>
+    <button class="nav-btn primary" onclick="goToStep(5)">Next: Navicat for MySQL →</button>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  STEP 5 — NAVICAT                                                   ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
+<section class="step-section" data-step="5">
+  <h2>
+    <span class="badge">Step 5</span>
+    Navicat Free for MySQL
+  </h2>
+  <p class="step-subtitle">Install a MySQL GUI and connect it to your Docker database.</p>
+
+  <div class="step-content">
+    <h3>5.1 — Download and Install</h3>
+
+    <div class="os-mac">
+      <ol>
+        <li>Go to <a href="https://www.navicat.com/en/download/navicat-for-mysql" target="_blank">navicat.com/en/download/navicat-for-mysql</a> and select <strong>macOS</strong>.</li>
+        <li>Download the <code>.dmg</code> installer.</li>
+        <li>Open it and drag Navicat to your <strong>Applications</strong> folder.</li>
+        <li>Launch Navicat and accept any licence agreements.</li>
+      </ol>
+    </div>
+
+    <div class="os-win">
+      <ol>
+        <li>Go to <a href="https://www.navicat.com/en/download/navicat-for-mysql" target="_blank">navicat.com/en/download/navicat-for-mysql</a> and select <strong>Windows</strong>.</li>
+        <li>Download the <code>.exe</code> installer.</li>
+        <li>Run it and accept the defaults.</li>
+        <li>Launch Navicat from the Start menu.</li>
+      </ol>
+    </div>
+
+    <div class="os-linux">
+      <ol>
+        <li>Go to <a href="https://www.navicat.com/en/download/navicat-for-mysql" target="_blank">navicat.com/en/download/navicat-for-mysql</a> and select <strong>Linux</strong>.</li>
+        <li>Download the AppImage or .tar.gz.</li>
+        <li>For AppImage:
+          <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>chmod +x navicat-for-mysql-*.AppImage
+./navicat-for-mysql-*.AppImage</pre>
+        </li>
+      </ol>
+      <div class="callout callout-tip"><strong>Tip:</strong> <a href="https://dbeaver.io/" target="_blank">DBeaver Community Edition</a> is an excellent free alternative on Linux. The connection settings below work with any MySQL client.</div>
+    </div>
+
+    <h3>5.2 — Connect to the Docker MySQL Server</h3>
+    <p>Make sure your Docker containers are running, then create a new connection in Navicat:</p>
+    <ol>
+      <li>Click <strong>Connection</strong> (or +) → <strong>MySQL</strong>.</li>
+      <li>Enter the following connection details:</li>
+    </ol>
+    <table>
+      <tr><th>Setting</th><th>Value</th></tr>
+      <tr><td>Connection Name</td><td>Docker MySQL (or any name)</td></tr>
+      <tr><td>Host</td><td><code>localhost</code> (or <code>127.0.0.1</code>)</td></tr>
+      <tr><td>Port</td><td><code>3306</code></td></tr>
+      <tr><td>Username</td><td><code>webapp_user</code></td></tr>
+      <tr><td>Password</td><td><code>dqgS5uthcuxR</code></td></tr>
+    </table>
+    <ol start="3">
+      <li>Click <strong>Test Connection</strong> — you should see "Connection Successful".</li>
+      <li>Click <strong>Save</strong> (or OK).</li>
+      <li><strong>Double-click</strong> the connection to open it. Expand the <code>webapp</code> database to browse tables.</li>
+    </ol>
+
+    <div class="callout callout-note"><strong>Note:</strong> For root-level access (creating databases, users, etc.), connect with username <code>root</code> and password <code>NvyRMSk68JUe</code>.</div>
+
+    <h3>5.3 — What You Can Do in Navicat</h3>
+    <ul>
+      <li>Browse and search table data visually</li>
+      <li>Write and run SQL queries with syntax highlighting</li>
+      <li>Create, alter, and drop tables, columns, and indexes</li>
+      <li>Import and export data (CSV, SQL, Excel, JSON)</li>
+      <li>Design tables visually with the table editor</li>
+      <li>Monitor active connections and running queries</li>
+    </ul>
+    <div class="callout callout-tip"><strong>Tip:</strong> After running CodeIgniter migrations (<code>php spark migrate</code> inside the PHP container), refresh Navicat to see newly created tables.</div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn secondary" onclick="goToStep(4)">← Previous</button>
+    <button class="nav-btn primary" onclick="goToStep(6)">Next: Troubleshooting →</button>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  STEP 6 — TROUBLESHOOTING                                           ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
+<section class="step-section" data-step="6">
+  <h2>
+    <span class="badge">Reference</span>
+    Troubleshooting
+  </h2>
+  <p class="step-subtitle">Common issues and how to resolve them.</p>
+
+  <div class="step-content">
+    <h3>Port 8080 or 3306 already in use</h3>
+    <p>Another application is using the port. Either stop it, or edit <code>docker-compose.yml</code> and change the port mapping (e.g., <code>"8888:80"</code> for Nginx or <code>"33060:3306"</code> for MySQL).</p>
+
+    <h3>MySQL connection refused</h3>
+    <p>The MySQL container may still be initialising. Wait 15–30 seconds and try again. Check its logs:</p>
+    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>docker compose logs mysql</pre>
+    <p>Look for "ready for connections" in the output.</p>
+
+    <h3>Docker build fails</h3>
+    <ul>
+      <li>Check your internet connection — Docker downloads base images.</li>
+      <li>Try a clean rebuild: <code>docker compose build --no-cache</code></li>
+      <li>Ensure at least 2 GB of free disk space.</li>
+    </ul>
+
+    <h3>Sourcetree asks for a password when pushing</h3>
+    <p>GitHub no longer accepts account passwords. Create a Personal Access Token: <strong>GitHub → Settings → Developer Settings → Personal Access Tokens → Tokens (classic) → Generate New Token</strong>. Give it <code>repo</code> scope. Use this token as your password.</p>
+
+    <h3>Claude Code: API key not working</h3>
+    <ul>
+      <li>Ensure your Anthropic account has API credits (<a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>).</li>
+      <li>Verify the key was copied completely (no trailing spaces).</li>
+      <li>Try setting it as an environment variable and running <code>claude</code> again.</li>
+    </ul>
+
+    <div class="os-mac">
+      <h3>Docker Desktop is slow on macOS</h3>
+      <p>In Docker Desktop preferences → Resources, allocate at least 4 GB of RAM. Under General, enable <strong>VirtioFS</strong> for faster volume performance.</p>
+    </div>
+
+    <div class="os-win">
+      <h3>Virtualisation errors on Windows</h3>
+      <p>Docker requires hardware virtualisation (VT-x / AMD-V). Enter your BIOS/UEFI settings and ensure it's enabled.</p>
+      <h3>WSL 2 not installing</h3>
+      <p>Run Windows Update to ensure you're on the latest version. WSL 2 requires Windows 10 version 1903+ or any Windows 11.</p>
+    </div>
+
+    <div class="os-linux">
+      <h3>Permission denied for docker commands</h3>
+      <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button>sudo usermod -aG docker $USER</pre>
+      <p>Then log out and log back in.</p>
+    </div>
+
+    <h3>Navicat can't connect to MySQL</h3>
+    <ul>
+      <li>Make sure Docker containers are running: <code>docker compose ps</code></li>
+      <li>Confirm you're connecting to <code>localhost:3306</code> (not the Docker internal hostname <code>mysql</code> — that's only for containers).</li>
+      <li>Verify credentials match your <code>.env</code> file.</li>
+    </ul>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn secondary" onclick="goToStep(5)">← Previous</button>
+    <span></span>
+  </div>
+</section>
+
+</main>
+
+<!-- ═══════════════════════ JAVASCRIPT ═══════════════════ -->
+<script>
+  const TOTAL_STEPS = 6;
+  let currentStep = 1;
+  let currentOS = 'mac';
+
+  // ── OS switching ──────────────────────────────────────────────────────────
+  document.querySelectorAll('.os-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.os-pill').forEach(p => { p.classList.remove('active'); p.setAttribute('aria-selected', 'false'); });
+      pill.classList.add('active');
+      pill.setAttribute('aria-selected', 'true');
+      currentOS = pill.dataset.os;
+      document.body.className = 'show-' + currentOS;
+      localStorage.setItem('bootcamp-os', currentOS);
+    });
+  });
+
+  // ── Step navigation ───────────────────────────────────────────────────────
+  function goToStep(step) {
+    if (step < 1 || step > TOTAL_STEPS) return;
+    currentStep = step;
+
+    // Toggle sections
+    document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+    const target = document.querySelector(`.step-section[data-step="${step}"]`);
+    if (target) target.classList.add('active');
+
+    // Sidebar
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    const link = document.querySelector(`.nav-link[data-step="${step}"]`);
+    if (link) link.classList.add('active');
+
+    // Progress
+    document.getElementById('progressFill').style.width = ((step / TOTAL_STEPS) * 100) + '%';
+
+    // Scroll
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    closeSidebar();
+
+    // Persist
+    localStorage.setItem('bootcamp-step', step);
+  }
+
+  // Sidebar clicks
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      goToStep(parseInt(link.dataset.step));
+    });
+  });
+
+  // ── Sidebar mobile toggle ─────────────────────────────────────────────────
+  function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('open');
+    document.querySelector('.sidebar-overlay').classList.toggle('open');
+  }
+  function closeSidebar() {
+    document.querySelector('.sidebar').classList.remove('open');
+    document.querySelector('.sidebar-overlay').classList.remove('open');
+  }
+
+  // ── Copy code ─────────────────────────────────────────────────────────────
+  function copyCode(btn) {
+    const pre = btn.parentElement;
+    const code = pre.textContent.replace('Copy', '').replace('Copied!', '').trim();
+    navigator.clipboard.writeText(code).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // ── Restore state ─────────────────────────────────────────────────────────
+  const savedOS = localStorage.getItem('bootcamp-os');
+  if (savedOS) {
+    currentOS = savedOS;
+    document.body.className = 'show-' + currentOS;
+    document.querySelectorAll('.os-pill').forEach(p => {
+      p.classList.toggle('active', p.dataset.os === currentOS);
+      p.setAttribute('aria-selected', p.dataset.os === currentOS ? 'true' : 'false');
+    });
+  }
+  const savedStep = localStorage.getItem('bootcamp-step');
+  if (savedStep) goToStep(parseInt(savedStep));
+  else goToStep(1);
+
+  // ── Keyboard nav ──────────────────────────────────────────────────────────
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' && !e.ctrlKey && !e.metaKey) goToStep(currentStep + 1);
+    if (e.key === 'ArrowLeft' && !e.ctrlKey && !e.metaKey) goToStep(currentStep - 1);
+  });
+</script>
+</body>
+</html>
