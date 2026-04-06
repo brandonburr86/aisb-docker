@@ -1,0 +1,6 @@
+# Prevent unnecessary files from being sent to the Docker build context.
+# Only Dockerfile, entrypoint.sh, and php-local.ini are needed for the build.
+README.md
+*.md
+.git
+.gitignore

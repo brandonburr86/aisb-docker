@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   # ---------- Nginx ----------
   nginx:
@@ -24,8 +22,12 @@ services:
     volumes:
       - ./src:/var/www/html
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - ci4-network
 
@@ -52,6 +54,12 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-NvyRMSk68JUe}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks:
       - ci4-network
 

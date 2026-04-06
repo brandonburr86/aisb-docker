@@ -1,0 +1,48 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Force LF line endings for all files that get mounted into Linux containers.
+# Without this, Windows Git (autocrlf) converts LF → CRLF, which breaks:
+#   - Shell scripts  (/bin/bash^M: bad interpreter)
+#   - Nginx configs  (parse errors on directives)
+#   - PHP ini files   (trailing \r in values)
+#   - MySQL configs   (trailing \r in values)
+#   - .env files      (Docker Compose appends \r to passwords → auth failures)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Shell scripts — critical (entrypoint, setup, teardown)
+*.sh        text eol=lf
+
+# Batch/PowerShell — keep native Windows endings
+*.bat       text eol=crlf
+*.ps1       text eol=crlf
+
+# Docker files
+Dockerfile  text eol=lf
+*.dockerfile text eol=lf
+.dockerignore text eol=lf
+
+# Config files mounted into containers
+*.conf      text eol=lf
+*.cnf       text eol=lf
+*.ini       text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+
+# Environment files
+.env        text eol=lf
+.env.*      text eol=lf
+
+# PHP source (mounted into container)
+*.php       text eol=lf
+
+# Web assets
+*.html      text eol=lf
+*.css       text eol=lf
+*.js        text eol=lf
+*.json      text eol=lf
+
+# Documentation
+*.md        text eol=lf
+
+# Git config
+.gitattributes text eol=lf
+.gitignore  text eol=lf

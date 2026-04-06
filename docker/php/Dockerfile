@@ -51,7 +51,14 @@ COPY php-local.ini /usr/local/etc/php/conf.d/php-local.ini
 # Set working directory
 WORKDIR /var/www/html
 
+# Ensure the writable directory has correct ownership for PHP-FPM (www-data).
+# This entrypoint script runs at container start, so it fixes permissions
+# even after a fresh "composer create-project" on a mounted volume.
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 # Expose port 9000 for PHP-FPM
 EXPOSE 9000
 
+ENTRYPOINT ["entrypoint.sh"]
 CMD ["php-fpm"]
